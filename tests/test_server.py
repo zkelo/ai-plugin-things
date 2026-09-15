@@ -90,8 +90,8 @@ class ServerTests(unittest.TestCase):
                 {
                     "name": "preview_task",
                     "arguments": {
-                        "title": "Купить чай & кофе",
-                        "notes": "Первая строка\nВторая",
+                        "title": "Buy tea 🍵 & coffee",
+                        "notes": "First line\nSecond line",
                     },
                 },
             ),

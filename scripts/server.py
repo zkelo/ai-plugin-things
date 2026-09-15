@@ -306,6 +306,7 @@ class Server:
             "capabilities": {"tools": {"listChanged": False}},
             "serverInfo": {"name": "things", "version": "1.0.0"},
             "instructions": (
+                "Use English by default for plugin responses; preserve task content in the user's language. "
                 "Create tasks only when the user asks to add them to Things. "
                 "Configure the required auth token before creating or previewing tasks. Never echo credentials. "
                 "Dispatch acknowledgements do not confirm persistence. Never "

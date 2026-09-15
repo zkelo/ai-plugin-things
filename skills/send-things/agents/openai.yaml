@@ -1,4 +1,4 @@
 interface:
   display_name: "Things"
-  short_description: "Отправка задач в Things через URI scheme"
-  default_prompt: "Добавь в Things задачи из моего сообщения."
+  short_description: "Send tasks to Things through its URI scheme"
+  default_prompt: "Add the tasks from my message to Things."

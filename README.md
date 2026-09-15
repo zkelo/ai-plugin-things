@@ -1,91 +1,93 @@
 # Things
 
-Локальный плагин Codex для отправки задач в **Things 3 на macOS** через [официальную Things URI scheme](https://culturedcode.com/things/support/articles/2803573/). Для работы плагина **обязательно нужно настроить ключ Things**. Код использует Python 3.9+ и стандартную библиотеку. Значок получен из установленного приложения Things. Названия и заметки могут содержать кириллицу, emoji и ссылки.
+[Russian documentation](README_ru.md)
 
-## Начало работы
+A local Codex plugin for sending tasks to **Things 3 on macOS** through the [official Things URI scheme](https://culturedcode.com/things/support/articles/2803573/). **A Things authentication token is required to use this plugin.** The code uses Python 3.9+ and the standard library. The icon comes from the installed Things application. Task titles and notes support Unicode, emoji, and links.
 
-Если плагин зарегистрирован в личном каталоге плагинов, откройте его карточку в Codex и нажмите «Установить». Либо используйте `codex plugin add things@personal`.
+## Getting started
 
-После установки начните новую задачу в Codex, чтобы появились инструменты плагина. В Things включите **Things → Settings → General → Enable Things URLs**. При первом обращении Things также может предложить включить эту настройку.
+If the plugin is registered in your personal plugin marketplace, open its card in Codex and select **Install**. Alternatively, use `codex plugin add things@personal`.
 
-## Обязательный ключ Things
+After installation, start a new task in Codex to make the plugin tools available. In Things, enable **Things → Settings → General → Enable Things URLs**. Things may also prompt you to enable this setting when you first use a Things URL.
 
-Скопируйте ключ в **Things → Settings → General → Enable Things URLs → Manage**. В новой задаче Codex попросите настроить ключ Things и передайте его: плагин использует инструмент `configure_auth_token`. Он сохраняет ключ локально и возвращает только подтверждение настройки. Затем задачи можно отправлять обычными запросами.
+## Required Things authentication token
 
-Добавление одиночных задач, пакетов и предпросмотр блокируются, пока ключ не указан. `get_status` показывает `auth_token_configured: true/false`, без значения ключа. Это проверка наличия и формата; подлинность ключа и сохранение задач не подтверждаются ответом macOS `open`.
+Copy the token from **Things → Settings → General → Enable Things URLs → Manage**. In a new Codex task, ask to configure your Things token and provide it: the plugin uses the `configure_auth_token` tool. It saves the token locally and returns only a configuration confirmation. You can then send tasks using ordinary requests.
 
-Ключ хранится отдельно от плагина в `~/.config/things-uri/config.json`; файл создаётся с правами `0600`. Запись атомарная, смена ключа применяется при следующем запросе без перезапуска сервера. Ключ не включается в ответы, показанные URI, сообщения об ошибках или архив плагина.
+Adding individual tasks, adding batches, and previewing tasks are blocked until a token is configured. `get_status` reports `auth_token_configured: true/false` without exposing the token. This checks whether a token is present and has a valid format; a successful macOS `open` response does not verify the token's authenticity or confirm that tasks were saved.
 
-Для запуска через терминал можно использовать `THINGS_AUTH_TOKEN`: она имеет приоритет над сохранённой настройкой. Пока переменная задана, изменение ключа через плагин отклоняется с объяснением. `THINGS_URI_CONFIG_FILE` позволяет указать другое место для локальной настройки.
+The token is stored separately from the plugin in `~/.config/things-uri/config.json`; the file is created with `0600` permissions. Writes are atomic, and a token change takes effect on the next request without restarting the server. The token is excluded from responses, displayed URIs, error messages, and the plugin archive.
 
-Настройка через CLI с скрытым вводом ключа:
+For terminal launches, you can use `THINGS_AUTH_TOKEN`, which takes priority over the saved configuration. While this environment variable is set, attempts to change the token through the plugin are rejected with an explanation. `THINGS_URI_CONFIG_FILE` lets you choose another location for the local configuration.
+
+Configure the token through the CLI using hidden input:
 
 ```sh
 python3 scripts/things_uri.py configure-auth-token
 ```
 
-Примеры запросов:
+Example requests:
 
-- «Добавь в Things: купить молоко завтра».
-- «Добавь задачу отправить отчёт в проект Работа, начать завтра, дедлайн в пятницу».
-- «Отправь в Things задачи из этого списка».
-- «Добавь задачу подготовить релиз с чек-листом: проверить сборку, обновить документацию».
-- «Покажи URI для задачи позвонить врачу завтра в 10:00, без отправки».
+- "Add to Things: buy milk tomorrow."
+- "Add a task to send the report in the Work project, start tomorrow, with a deadline on Friday."
+- "Send the tasks from this list to Things."
+- "Add a task to prepare the release with a checklist: check the build, update the documentation."
+- "Show the URI for a task to call the doctor tomorrow at 10:00, without sending it."
 
-## Инструменты
+## Tools
 
-| Инструмент | Назначение |
+| Tool | Purpose |
 | --- | --- |
-| `add_task` | Отправить одну задачу; `preview: true` только строит URI |
-| `add_tasks` | Отправить пакет задач с индивидуальными параметрами; есть `preview` и `reveal` |
-| `preview_task` | Подготовить URI одной задачи без запуска Things |
-| `get_status` | Проверить macOS и наличие Things без создания задач |
-| `configure_auth_token` | Сохранить обязательный ключ Things в локальной настройке |
+| `add_task` | Send one task; `preview: true` only prepares its URI |
+| `add_tasks` | Send a batch of tasks with individual settings; supports `preview` and `reveal` |
+| `preview_task` | Prepare one task's URI without launching Things |
+| `get_status` | Check macOS, Things availability, and token configuration without creating tasks |
+| `configure_auth_token` | Save the required Things token in the local configuration |
 
-Задача принимает `title` и необязательные поля `notes`, `when`, `deadline`, `tags` (массив), `checklist_items` (массив), `list` / `list_id`, `heading` / `heading_id`. `reveal` показывает добавленную задачу. Предпросмотр позволяет проверить содержимое без отправки.
+A task accepts `title` and the optional fields `notes`, `when`, `deadline`, `tags` (an array), `checklist_items` (an array), `list` / `list_id`, and `heading` / `heading_id`. `reveal` shows the added task. Previewing lets you check its contents before sending it.
 
-`when` задаёт дату начала: `today`, `tomorrow`, `evening`, `anytime`, `someday` либо `YYYY-MM-DD`. Напоминание задаётся как `YYYY-MM-DD@HH:MM` или `tomorrow@HH:MM` в локальном часовом поясе. Для `anytime` и `someday` напоминания недоступны. `deadline` — отдельный жёсткий срок: `YYYY-MM-DD`, `today` либо `tomorrow`. Русские относительные даты Codex переводит в эти форматы до вызова инструмента.
+`when` sets the start date: `today`, `tomorrow`, `evening`, `anytime`, `someday`, or `YYYY-MM-DD`. Set a reminder using `YYYY-MM-DD@HH:MM` or `tomorrow@HH:MM` in the local time zone. Reminders are unavailable for `anytime` and `someday`. `deadline` is a separate due date: `YYYY-MM-DD`, `today`, or `tomorrow`. Codex converts natural-language dates into these formats before calling the tool.
 
-Без даты и проекта задача отправляется во входящие. Проект, область, заголовки и теги должны уже существовать в Things. Идентификатор имеет приоритет над названием. Неизвестные теги и заголовки Things может проигнорировать. Плагин не создаёт повторения, новые проекты или теги и не изменяет существующие задачи.
+Without a date or destination project, the task goes to the Inbox. Projects, areas, headings, and tags must already exist in Things. An identifier takes priority over a name. Things may ignore unknown tags and headings. The plugin does not create recurring tasks, new projects, or tags, and it does not update existing tasks.
 
-## Отправка и проверка результата
+## Sending tasks and checking the result
 
-Одиночные задачи и пакеты используют `things:///json` с операциями `create` и параметром `auth-token`. Значения кодируются через percent encoding, затем весь URI передаётся Things одним аргументом macOS `open`, без выполнения содержимого задачи в командной оболочке. Отображаемый URI содержит содержимое задач и исключает ключ; отправляемый URI хранится отдельно и не возвращается в ответах. Quick Entry недоступен у этой команды, поэтому используется предпросмотр.
+Individual tasks and batches use `things:///json` with `create` operations and an `auth-token` parameter. Values are percent-encoded, then the complete URI is passed to Things as one argument to macOS `open`, without executing task contents in a shell. The displayed URI includes task contents and excludes the token; the URI used for delivery is kept separately and is never returned in responses. Quick Entry is unavailable for this command, so use a preview to inspect a task before sending it.
 
-Успешная передача возвращает `status: dispatched`, **а не подтверждение сохранения**. macOS `open` не возвращает ID задачи или подтверждение от Things; поле `creation_verified` всегда `false`. При тайм-ауте проверьте Things перед повтором, чтобы избежать дублей. Предпросмотр возвращает `status: preview` и ничего не отправляет. Проверка наличия приложения не определяет, включена ли URI scheme.
+A successful handoff returns `status: dispatched`; **this does not confirm that the tasks were saved**. macOS `open` does not return a task ID or an acknowledgement from Things, and `creation_verified` is always `false`. After a timeout, check Things before retrying to avoid duplicates. A preview returns `status: preview` and sends nothing. Checking whether the application exists does not determine whether its URI scheme is enabled.
 
-Название — до 4 000 символов, заметки — до 10 000, чек-лист — до 100 пунктов. Пакет ограничен 250 задачами. Things документирует ограничение 250 элементов за 10 секунд; при больших списках разбивайте отправку и выдерживайте интервал. Запятые в названиях тегов поддерживаются.
+Titles are limited to 4,000 characters, notes to 10,000 characters, and checklists to 100 items. A batch is limited to 250 tasks. Things documents a limit of 250 items every 10 seconds; split larger lists into batches and wait between them. Commas in tag names are supported.
 
-## Запуск без MCP
+## Running without MCP
 
-В корне плагина можно передать JSON через стандартный ввод:
+From the plugin root, pass JSON through standard input:
 
 ```sh
 python3 scripts/things_uri.py add-task --preview <<'JSON'
-{"title":"Купить молоко 🥛","when":"tomorrow","checklist_items":["Молоко","Хлеб"]}
+{"title":"Buy milk 🥛","when":"tomorrow","checklist_items":["Milk","Bread"]}
 JSON
 ```
 
-Для отправки уберите `--preview`. Для пакета используйте `add-tasks` и JSON-массив задач. Проверка наличия приложения: `python3 scripts/things_uri.py status`.
+Remove `--preview` to send the task. For a batch, use `add-tasks` with a JSON array of tasks. Check application availability with `python3 scripts/things_uri.py status`.
 
-Если Python недоступен в окружении Codex, задайте `THINGS_PYTHON` как абсолютный путь к Python 3.9+ в окружении запуска приложения. На iPhone/iPad подготовленный `things:///` URI можно открыть вручную; автоматическая отправка этим плагином работает на Mac.
+If Python is unavailable in the Codex environment, set `THINGS_PYTHON` to the absolute path of a Python 3.9+ executable in the application's launch environment. On an iPhone or iPad, you can open a prepared `things:///` URI manually; automatic delivery through this plugin works on a Mac.
 
-## Проверка плагина
+## Architecture and verification
 
-Код разделён по принципам Clean Architecture:
+The code follows Clean Architecture principles:
 
-| Слой | Файлы | Ответственность |
+| Layer | Files | Responsibility |
 | --- | --- | --- |
-| Домен | `scripts/things_plugin/domain.py` | Неизменяемые задачи и назначения, правила данных |
-| Приложение | `scripts/things_plugin/application.py` | Сценарии отправки и предпросмотра, типизированные результаты, порты зависимостей |
-| Инфраструктура | `scripts/things_plugin/infrastructure/` | Кодирование Things URI, передача macOS, поиск приложения |
-| Адаптеры | `scripts/things_plugin/payloads.py`, `scripts/things_uri.py`, `scripts/server.py` | Преобразование JSON, CLI и протокол MCP |
-| Сборка зависимостей | `scripts/things_plugin/composition.py` | Подключение конкретных адаптеров к приложению |
+| Domain | `scripts/things_plugin/domain.py` | Immutable tasks and destinations, data invariants |
+| Application | `scripts/things_plugin/application.py` | Delivery and preview use cases, typed results, dependency ports |
+| Infrastructure | `scripts/things_plugin/infrastructure/` | Things URI encoding, macOS delivery, application lookup, token storage |
+| Adapters | `scripts/things_plugin/payloads.py`, `scripts/things_uri.py`, `scripts/server.py` | JSON conversion, CLI, and the MCP protocol |
+| Composition | `scripts/things_plugin/composition.py` | Wiring concrete adapters into the application |
 
-Домен не импортирует протоколы, кодировщик URI или macOS. Приложение зависит от четырёх портов `Protocol`: кодировщик, отправка, поиск приложения и хранилище ключа; конкретные реализации подключаются снаружи. Ключ не относится к доменной модели задачи. `PreparedUri` разделяет закрытый транспортный URI и безопасный предпросмотр. Транспортные ограничения команды Things проверяет кодировщик. Отправка выполняется после подготовки всего запроса; ошибки неопределённой доставки имеют отдельный признак `delivery_unknown`. Состояние задачи не меняется после создания.
+The domain does not import protocols, the URI encoder, or macOS integrations. The application depends on four `Protocol` ports: URI encoding, delivery, application lookup, and token storage; concrete implementations are supplied externally. The token is not part of the task domain model. `PreparedUri` separates the private delivery URI from the preview URI that omits the token. The encoder checks transport limits imposed by the Things command. Delivery starts only after the entire request has been prepared; errors with an uncertain delivery outcome carry a separate `delivery_unknown` flag. A task's state cannot change after construction.
 
 ```sh
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
 ```
 
-Тесты проверяют кодирование и структуру URI, валидацию, ошибки отправки и протокол MCP. Вызовы создания задач в тестах заменены; тестовые задачи в Things не добавляются.
+Tests cover URI encoding and structure, validation, delivery errors, and the MCP protocol. Task-creation calls are replaced with test doubles, so the tests do not add tasks to Things.

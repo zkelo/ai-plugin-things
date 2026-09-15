@@ -37,8 +37,8 @@ class UriTests(unittest.TestCase):
         self.addCleanup(environment.stop)
 
     def test_authenticated_uri_encodes_secret_once_but_public_uri_omits_it(self):
-        title = "Купить 🥛 & кофе + 50% # ? `whoami` $(id)"
-        notes = "Строка 1\nhttps://example.com/?a=1&b=2"
+        title = "Buy 🥛 & coffee + 50% # ? `whoami` $(id)"
+        notes = "Line 1\nhttps://example.com/?a=1&b=2"
         request = ThingsUriBuilder().build_task(
             Task(title, notes=notes), TaskOptions(), AuthToken(TEST_TOKEN)
         )
@@ -57,7 +57,7 @@ class UriTests(unittest.TestCase):
                 "title": "Release",
                 "when": "2026-09-16@10:30",
                 "deadline": "2026-09-18",
-                "tags": ["Работа, дом", "Urgent"],
+                "tags": ["Work, home", "Urgent"],
                 "checklist_items": ["Build", "Docs"],
                 "list": "Ignored",
                 "list_id": "project-id",
@@ -78,14 +78,14 @@ class UriTests(unittest.TestCase):
                 {"type": "checklist-item", "attributes": {"title": "Docs"}},
             ],
         )
-        self.assertEqual(attributes["tags"], ["Работа, дом", "Urgent"])
+        self.assertEqual(attributes["tags"], ["Work, home", "Urgent"])
         self.assertEqual(parameters(uri)["reveal"], ["true"])
         self.assertNotIn("auth-token", parameters(uri))
 
     def test_batch_keeps_each_tasks_parameters(self):
         tasks = [
-            {"title": "Чай", "tags": ["Дом"]},
-            {"title": "Отчёт", "deadline": "2026-09-18", "list_id": "work"},
+            {"title": "Tea", "tags": ["Home"]},
+            {"title": "Report", "deadline": "2026-09-18", "list_id": "work"},
         ]
         objects = json.loads(parameters(things_uri.build_tasks_uri(tasks))["data"][0])
         self.assertEqual([task["operation"] for task in objects], ["create", "create"])
@@ -124,7 +124,7 @@ class UriTests(unittest.TestCase):
             {"title": 4},
             {"title": "x", "unknown": 1},
             {"title": "x", "when": "2026-02-30"},
-            {"title": "x", "when": "завтра"},
+            {"title": "x", "when": "next week"},
             {"title": "x", "when": "tomorrow@25:00"},
             {"title": "x", "deadline": "today@10:00"},
             {"title": "x", "heading": "Orphan"},

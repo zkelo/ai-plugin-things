@@ -21,8 +21,8 @@ class TaskTests(unittest.TestCase):
         self.assertEqual(Task("Release"), Task("Release"))
 
     def test_domain_retains_text_and_accepts_multiline_or_empty_notes(self):
-        title = " Купить 🥛 & кофе + 50% # ? `whoami` $(id) "
-        notes = "Строка 1\nСтрока 2\r\nhttps://example.com/?a=1&b=2"
+        title = " Buy 🥛 & coffee + 50% # ? `whoami` $(id) "
+        notes = "Line 1\nLine 2\r\nhttps://example.com/?a=1&b=2"
         task = Task(title, notes=notes)
         self.assertEqual(task.title, title)
         self.assertEqual(task.notes, notes)
@@ -128,7 +128,7 @@ class TaskTests(unittest.TestCase):
             "0000-01-01",
             "2026-9-15",
             "20260915",
-            "завтра",
+            "next week",
             " today",
             "today\n",
         )
