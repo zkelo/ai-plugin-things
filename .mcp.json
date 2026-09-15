@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "things": {
+      "type": "stdio",
+      "command": "/bin/sh",
+      "args": [
+        "-c",
+        "exec \"${THINGS_PYTHON:-python3}\" \"${CLAUDE_PLUGIN_ROOT}/scripts/server.py\""
+      ]
+    }
+  }
+}
