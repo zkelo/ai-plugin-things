@@ -134,7 +134,7 @@ def serialize_status(status: ApplicationStatus) -> JsonObject:
         "app_found": status.app_found,
         "auth_token_configured": status.auth_token_configured,
         "uri_scheme_enabled": "unknown",
-        "can_preview": True,
+        "can_preview": status.auth_token_configured,
     }
     if status.app_path is not None:
         payload["app_path"] = status.app_path

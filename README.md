@@ -16,7 +16,7 @@ Copy the token from **Things → Settings → General → Enable Things URLs →
 
 Adding individual tasks, adding batches, and previewing tasks are blocked until a token is configured. `get_status` reports `auth_token_configured: true/false` without exposing the token. This checks whether a token is present and has a valid format; a successful macOS `open` response does not verify the token's authenticity or confirm that tasks were saved.
 
-The token is stored separately from the plugin in `~/.config/things-uri/config.json`; the file is created with `0600` permissions. Writes are atomic, and a token change takes effect on the next request without restarting the server. The token is excluded from responses, displayed URIs, error messages, and the plugin archive.
+The token is stored separately from the plugin in `~/.config/things-uri/config.json`; the file is created with `0600` permissions. Existing configuration files with group or public access are rejected. Writes are atomic, and a token change takes effect on the next request without restarting the server. The token is excluded from responses, displayed URIs, error messages, and the plugin archive.
 
 For terminal launches, you can use `THINGS_AUTH_TOKEN`, which takes priority over the saved configuration. While this environment variable is set, attempts to change the token through the plugin are rejected with an explanation. `THINGS_URI_CONFIG_FILE` lets you choose another location for the local configuration.
 
@@ -70,7 +70,11 @@ JSON
 
 Remove `--preview` to send the task. For a batch, use `add-tasks` with a JSON array of tasks. Check application availability with `python3 scripts/things_uri.py status`.
 
-If Python is unavailable in the Codex environment, set `THINGS_PYTHON` to the absolute path of a Python 3.9+ executable in the application's launch environment. On an iPhone or iPad, you can open a prepared `things:///` URI manually; automatic delivery through this plugin works on a Mac.
+If Python is unavailable in the Codex environment, set `THINGS_PYTHON` to the absolute path of a Python 3.9+ executable in the application's launch environment. Automatic delivery through this plugin requires Things on the same Mac. A preview URI is for inspection only: it deliberately omits the mandatory token and cannot create the task by itself.
+
+## Public directory preparation
+
+Draft listing copy, review cases, annotation justifications, public-page drafts, and a readiness checklist live in [`store/`](store/). They have not been submitted or published. The current runtime is a local stdio MCP server that opens Things on the same Mac; public directory submission remains blocked until that local handoff has an OpenAI-supported review route or a safe public HTTPS architecture, and until the credential channel, publisher, public URLs, and Cultured Code authorization for the integration and its Things branding are confirmed.
 
 ## Architecture and verification
 

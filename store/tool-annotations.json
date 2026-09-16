@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "status": "draft_not_submitted",
+  "tools": [
+    {
+      "name": "add_task",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justification": "Creates one new task in the user's private Things database. It changes user data but does not modify or remove an existing task and does not access the public web."
+    },
+    {
+      "name": "add_tasks",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justification": "Creates a bounded batch of new tasks in the user's private Things database. It changes user data but does not modify or remove existing tasks and does not access the public web."
+    },
+    {
+      "name": "preview_task",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justification": "Validates task data and returns a token-free preview URI without opening Things or changing user data."
+    },
+    {
+      "name": "get_status",
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justification": "Reads local platform, application availability, and a credential-presence flag without returning the credential or changing state."
+    },
+    {
+      "name": "configure_auth_token",
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false,
+        "destructiveHint": true
+      },
+      "justification": "Stores a user-provided Things credential in private local configuration and can overwrite the previously stored credential, so the change is destructive even though it does not alter task data or access the public web."
+    }
+  ]
+}

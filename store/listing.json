@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "draft_not_submitted",
+  "name": "Things",
+  "version": "1.0.1",
+  "shortDescription": "Add tasks to Things 3.",
+  "longDescription": "Create one task or a batch of tasks in Things 3 on macOS through the Things URI scheme. Add notes, start dates, reminders, deadlines, existing tags, checklists, and existing project or heading destinations. Preview a task before sending it. Requires Things 3 for macOS, Things URLs enabled, and a user-provided Things authentication token.",
+  "category": "Productivity",
+  "capabilities": [
+    "Write"
+  ],
+  "starterPrompts": [
+    "Add to Things: buy milk tomorrow.",
+    "Send these tasks to Things: book the hotel, renew my passport, and buy travel insurance.",
+    "Preview a Things task to call the dentist tomorrow at 10:00 without sending it."
+  ],
+  "releaseNotes": "Initial directory candidate for version 1.0.1 with authenticated single-task and batch creation, previews, structured tool results, notes, dates, reminders, deadlines, existing destinations and tags, and checklists.",
+  "publisher": {
+    "verifiedIdentity": null,
+    "developerName": null
+  },
+  "websiteUrl": null,
+  "supportUrl": null,
+  "privacyPolicyUrl": null,
+  "termsOfServiceUrl": null,
+  "publicMcpUrl": null,
+  "demoRecordingUrl": null,
+  "countryAvailability": null
+}

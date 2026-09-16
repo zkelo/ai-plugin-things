@@ -25,6 +25,11 @@ class ConfigurationTests(unittest.TestCase):
         self.environment: Dict[str, str] = {}
         self.store = FileAuthTokenStore(self.path, self.environment)
 
+    def write_private_configuration(self, content: str) -> None:
+        self.path.parent.mkdir(exist_ok=True)
+        self.path.write_text(content, encoding="utf-8")
+        self.path.chmod(0o600)
+
     def test_missing_configuration_returns_no_key_and_does_not_create_files(
         self,
     ) -> None:
@@ -47,12 +52,10 @@ class ConfigurationTests(unittest.TestCase):
         self.assertEqual(stat.S_IMODE(nested.parent.parent.stat().st_mode), 0o700)
 
     def test_save_preserves_unrelated_configuration_fields(self) -> None:
-        self.path.parent.mkdir()
-        self.path.write_text(
+        self.write_private_configuration(
             json.dumps(
                 {"auth_token": "old-fixture-key", "preferences": {"reveal": True}}
-            ),
-            encoding="utf-8",
+            )
         )
         self.store.save(AuthToken("replacement-fixture-key"))
         document = json.loads(self.path.read_text(encoding="utf-8"))
@@ -123,9 +126,8 @@ class ConfigurationTests(unittest.TestCase):
         )
 
     def test_invalid_stored_key_is_redacted_and_not_overwritten_by_read(self) -> None:
-        self.path.parent.mkdir()
         original = json.dumps({"auth_token": "fixture-secret\n"})
-        self.path.write_text(original, encoding="utf-8")
+        self.write_private_configuration(original)
         with self.assertRaises(AuthenticationError) as raised:
             self.store.get()
         self.assertNotIn("fixture-secret", str(raised.exception))
@@ -134,10 +136,9 @@ class ConfigurationTests(unittest.TestCase):
     def test_invalid_json_and_nonobject_configuration_have_redacted_errors(
         self,
     ) -> None:
-        self.path.parent.mkdir()
         for document in ('{"auth_token": "fixture-secret"', '["fixture-secret"]'):
             with self.subTest(document_type=document[:1]):
-                self.path.write_text(document, encoding="utf-8")
+                self.write_private_configuration(document)
                 with self.assertRaises(AuthenticationError) as raised:
                     self.store.get()
                 self.assertNotIn("fixture-secret", str(raised.exception))
@@ -146,9 +147,20 @@ class ConfigurationTests(unittest.TestCase):
                 self.assertEqual(self.path.read_text(encoding="utf-8"), document)
 
     def test_configuration_without_auth_token_returns_none(self) -> None:
-        self.path.parent.mkdir()
-        self.path.write_text('{"preferences": {}}', encoding="utf-8")
+        self.write_private_configuration('{"preferences": {}}')
         self.assertIsNone(self.store.get())
+
+    def test_insecure_permissions_are_refused_without_exposing_the_key(self) -> None:
+        key = "fixture-permission-secret"
+        self.path.parent.mkdir()
+        self.path.write_text(json.dumps({"auth_token": key}), encoding="utf-8")
+        self.path.chmod(0o644)
+        with self.assertRaisesRegex(AuthenticationError, "owner-only") as raised:
+            self.store.get()
+        self.assertNotIn(key, str(raised.exception))
+        with self.assertRaises(AuthenticationError):
+            self.store.save(AuthToken("replacement-fixture-key"))
+        self.assertEqual(stat.S_IMODE(self.path.stat().st_mode), 0o644)
 
     def test_symbolic_link_is_refused_without_modifying_destination(self) -> None:
         self.path.parent.mkdir()

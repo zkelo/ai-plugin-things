@@ -83,6 +83,10 @@ class FileAuthTokenStore:
             raise AuthenticationError(
                 "The local Things configuration must belong to this user."
             )
+        if stat.S_IMODE(metadata.st_mode) & 0o077:
+            raise AuthenticationError(
+                "The local Things configuration must use owner-only permissions."
+            )
         return True
 
     def _save_document(self, document: Dict[str, Any]) -> None:

@@ -20,6 +20,7 @@ from things_plugin.payloads import (
 JsonObject = Dict[str, Any]
 RequestId = Union[str, int]
 SUPPORTED_VERSIONS = ("2024-11-05", "2025-03-26", "2025-06-18")
+SERVER_VERSION = "1.0.1"
 PREVIEW_PROPERTY: JsonObject = {
     "type": "boolean",
     "description": "Build and validate the URI without opening Things (default false).",
@@ -28,13 +29,68 @@ CREATE_ANNOTATIONS: Dict[str, bool] = {
     "readOnlyHint": False,
     "destructiveHint": False,
     "idempotentHint": False,
-    "openWorldHint": True,
+    "openWorldHint": False,
 }
 READ_ANNOTATIONS: Dict[str, bool] = {
     "readOnlyHint": True,
     "destructiveHint": False,
     "idempotentHint": True,
     "openWorldHint": False,
+}
+
+DELIVERY_OUTPUT_SCHEMA: JsonObject = {
+    "type": "object",
+    "properties": {
+        "status": {"type": "string", "enum": ["preview", "dispatched"]},
+        "uri": {"type": "string"},
+        "task_count": {"type": "integer", "minimum": 1},
+        "titles": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string"},
+        },
+        "creation_verified": {"type": "boolean"},
+        "message": {"type": "string"},
+    },
+    "required": [
+        "status",
+        "uri",
+        "task_count",
+        "titles",
+        "creation_verified",
+        "message",
+    ],
+    "additionalProperties": False,
+}
+STATUS_OUTPUT_SCHEMA: JsonObject = {
+    "type": "object",
+    "properties": {
+        "platform": {"type": "string"},
+        "bundle_id": {"type": "string"},
+        "app_found": {"type": "boolean"},
+        "auth_token_configured": {"type": "boolean"},
+        "uri_scheme_enabled": {"type": "string", "enum": ["unknown"]},
+        "can_preview": {"type": "boolean"},
+        "app_path": {"type": "string"},
+    },
+    "required": [
+        "platform",
+        "bundle_id",
+        "app_found",
+        "auth_token_configured",
+        "uri_scheme_enabled",
+        "can_preview",
+    ],
+    "additionalProperties": False,
+}
+CONFIGURATION_OUTPUT_SCHEMA: JsonObject = {
+    "type": "object",
+    "properties": {
+        "status": {"type": "string", "enum": ["configured"]},
+        "auth_token_configured": {"type": "boolean", "enum": [True]},
+    },
+    "required": ["status", "auth_token_configured"],
+    "additionalProperties": False,
 }
 
 
@@ -62,6 +118,7 @@ def tool_definitions() -> List[JsonObject]:
                 dict(SINGLE_TASK_PROPERTIES, preview=PREVIEW_PROPERTY),
                 ("title",),
             ),
+            "outputSchema": DELIVERY_OUTPUT_SCHEMA,
             "annotations": CREATE_ANNOTATIONS,
         },
         {
@@ -89,18 +146,21 @@ def tool_definitions() -> List[JsonObject]:
                 },
                 ("tasks",),
             ),
+            "outputSchema": DELIVERY_OUTPUT_SCHEMA,
             "annotations": CREATE_ANNOTATIONS,
         },
         {
             "name": "preview_task",
             "description": "Validate one task and return its Things URI without opening Things.",
             "inputSchema": object_schema(SINGLE_TASK_PROPERTIES, ("title",)),
+            "outputSchema": DELIVERY_OUTPUT_SCHEMA,
             "annotations": READ_ANNOTATIONS,
         },
         {
             "name": "get_status",
             "description": "Check local platform, Things availability and whether the required key is configured. Never returns the key.",
             "inputSchema": object_schema({}),
+            "outputSchema": STATUS_OUTPUT_SCHEMA,
             "annotations": READ_ANNOTATIONS,
         },
         {
@@ -116,9 +176,10 @@ def tool_definitions() -> List[JsonObject]:
                 },
                 ("auth_token",),
             ),
+            "outputSchema": CONFIGURATION_OUTPUT_SCHEMA,
             "annotations": {
                 "readOnlyHint": False,
-                "destructiveHint": False,
+                "destructiveHint": True,
                 "idempotentHint": True,
                 "openWorldHint": False,
             },
@@ -145,7 +206,13 @@ def error_response(
 
 def tool_result(value: JsonObject, is_error: bool = False) -> JsonObject:
     content_text = json.dumps(value, ensure_ascii=False, allow_nan=False)
-    return {"content": [{"type": "text", "text": content_text}], "isError": is_error}
+    result: JsonObject = {
+        "content": [{"type": "text", "text": content_text}],
+        "isError": is_error,
+    }
+    if not is_error:
+        result["structuredContent"] = value
+    return result
 
 
 def validate_arguments(
@@ -304,7 +371,7 @@ class Server:
         return {
             "protocolVersion": negotiated_version,
             "capabilities": {"tools": {"listChanged": False}},
-            "serverInfo": {"name": "things", "version": "1.0.0"},
+            "serverInfo": {"name": "things", "version": SERVER_VERSION},
             "instructions": (
                 "Use English by default for plugin responses; preserve task content in the user's language. "
                 "Create tasks only when the user asks to add them to Things. "

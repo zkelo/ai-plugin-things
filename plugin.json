@@ -1,0 +1,31 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "things",
+  "version": "1.0.1",
+  "description": "Send tasks to Things 3 through its URI scheme on macOS.",
+  "author": {
+    "name": "Local developer"
+  },
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Things",
+        "shortDescription": "Add tasks to Things 3.",
+        "longDescription": "Local Things 3 integration for macOS: single tasks and batches, notes, dates, reminders, tags, checklists, and existing projects. A Things key is required and stored in private local configuration. Preview tasks without creating them. Uses Python 3.9+ and the standard library.",
+        "composerIcon": "./assets/icon.png",
+        "logo": "./assets/icon.png",
+        "logoDark": "./assets/icon.png",
+        "developerName": "Local developer",
+        "category": "Productivity",
+        "capabilities": [
+          "Write"
+        ],
+        "defaultPrompt": [
+          "Add to Things: buy milk tomorrow.",
+          "Send this list of tasks to Things.",
+          "Prepare a Things task with a checklist."
+        ]
+      }
+    }
+  }
+}

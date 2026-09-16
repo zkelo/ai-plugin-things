@@ -112,7 +112,9 @@ class UriTests(unittest.TestCase):
             for call in calls:
                 with self.assertRaises(AuthenticationError):
                     call()
-            self.assertFalse(things_uri.get_status()["auth_token_configured"])
+            status = things_uri.get_status()
+            self.assertFalse(status["auth_token_configured"])
+            self.assertFalse(status["can_preview"])
             opening.assert_not_called()
 
     def test_invalid_task_and_request_limits_prevent_dispatch(self):
@@ -227,6 +229,7 @@ class UriTests(unittest.TestCase):
                 status = things_uri.get_status()
                 self.assertTrue(status["app_found"])
                 self.assertTrue(status["auth_token_configured"])
+                self.assertTrue(status["can_preview"])
                 self.assertNotIn(TEST_TOKEN, json.dumps(status))
                 opening.assert_not_called()
 

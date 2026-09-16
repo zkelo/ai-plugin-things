@@ -62,6 +62,32 @@ def ready_server(task_service: TaskService) -> server.Server:
 
 
 class ServerTests(unittest.TestCase):
+    def test_every_tool_has_accurate_review_annotations(self) -> None:
+        definitions = {tool["name"]: tool for tool in server.tool_definitions()}
+        expected = {
+            "add_task": (False, False, False),
+            "add_tasks": (False, False, False),
+            "preview_task": (True, False, False),
+            "get_status": (True, False, False),
+            "configure_auth_token": (False, False, True),
+        }
+
+        for name, (read_only, open_world, destructive) in expected.items():
+            with self.subTest(tool=name):
+                annotations = definitions[name]["annotations"]
+                self.assertIs(annotations["readOnlyHint"], read_only)
+                self.assertIs(annotations["openWorldHint"], open_world)
+                self.assertIs(annotations["destructiveHint"], destructive)
+
+    def test_every_tool_declares_structured_success_output(self) -> None:
+        definitions = {tool["name"]: tool for tool in server.tool_definitions()}
+        for name, definition in definitions.items():
+            with self.subTest(tool=name):
+                schema = definition["outputSchema"]
+                self.assertEqual(schema["type"], "object")
+                self.assertFalse(schema["additionalProperties"])
+                self.assertTrue(schema["required"])
+
     def test_supported_version_negotiation_and_latest_fallback(self) -> None:
         for version in server.SUPPORTED_VERSIONS + ("2099-01-01",):
             with self.subTest(version=version):
@@ -77,6 +103,10 @@ class ServerTests(unittest.TestCase):
                 self.assertEqual(
                     response["result"]["capabilities"],
                     {"tools": {"listChanged": False}},
+                )
+                self.assertEqual(
+                    response["result"]["serverInfo"]["version"],
+                    server.SERVER_VERSION,
                 )
 
     def test_stdio_handshake_listing_unicode_preview_and_clean_eof(self) -> None:
@@ -129,6 +159,7 @@ class ServerTests(unittest.TestCase):
         )
         self.assertFalse(responses[2]["result"]["isError"])
         preview = json.loads(responses[2]["result"]["content"][0]["text"])
+        self.assertEqual(responses[2]["result"]["structuredContent"], preview)
         self.assertIn("things:///json?", json.dumps(preview))
         self.assertNotIn("synthetic-mcp-token", result.stdout.decode("utf-8"))
         self.assertEqual(responses[3]["result"], {})
@@ -282,6 +313,7 @@ class ServerTests(unittest.TestCase):
             error_payload, {"status": "error", "message": "Things unavailable"}
         )
         self.assertTrue(response["result"]["isError"])
+        self.assertNotIn("structuredContent", response["result"])
 
         task_service.add_tasks.return_value = DeliveryResult(
             DeliveryStatus.PREVIEW, "things:///json?data=preview", ("Task",)
@@ -328,6 +360,10 @@ class ServerTests(unittest.TestCase):
             Task(title="Task"), TaskOptions(reveal=True), preview=True
         )
         self.assertFalse(preview_response["result"]["isError"])
+        self.assertEqual(
+            preview_response["result"]["structuredContent"],
+            json.loads(preview_response["result"]["content"][0]["text"]),
+        )
         status_response = instance.handle(
             request(
                 3,

@@ -1,0 +1,262 @@
+{
+  "schemaVersion": 1,
+  "suite": "Things directory evaluation draft",
+  "status": "draft_not_submitted",
+  "cases": [
+    {
+      "id": "positive-01-single-task",
+      "kind": "positive",
+      "preconditions": [
+        "A valid Things authentication token is configured.",
+        "Things 3 is installed on the local Mac and Things URLs are enabled."
+      ],
+      "input": "Add to Things: buy milk tomorrow.",
+      "expected": {
+        "toolSelection": {
+          "name": "add_task",
+          "callCount": 1
+        },
+        "normalizedArguments": {
+          "title": "Buy milk",
+          "when": "tomorrow"
+        },
+        "resultShape": {
+          "status": "dispatched",
+          "uri": "Token-free Things URI string",
+          "task_count": 1,
+          "titles": [
+            "Buy milk"
+          ],
+          "creation_verified": false,
+          "message": "Handoff status string"
+        },
+        "behavior": [
+          "Dispatch exactly once.",
+          "Describe a dispatched result as a handoff to Things, not proof that the task was saved.",
+          "Do not retry automatically if the delivery outcome is uncertain."
+        ],
+        "nonDisclosure": [
+          "Do not include the authentication token in the response, returned URI, or error text."
+        ]
+      }
+    },
+    {
+      "id": "positive-02-detailed-task",
+      "kind": "positive",
+      "preconditions": [
+        "A valid Things authentication token is configured.",
+        "The Work project, Planning heading, Finance tag, and Deep Work tag already exist in Things."
+      ],
+      "input": "Add Prepare quarterly review to my existing Work project under Planning. Start it on 2026-09-21 at 09:00, set the deadline to 2026-09-25, add the Finance and Deep Work tags, and include a checklist for Collect metrics and Draft slides.",
+      "expected": {
+        "toolSelection": {
+          "name": "add_task",
+          "callCount": 1
+        },
+        "normalizedArguments": {
+          "title": "Prepare quarterly review",
+          "when": "2026-09-21@09:00",
+          "deadline": "2026-09-25",
+          "tags": [
+            "Finance",
+            "Deep Work"
+          ],
+          "checklist_items": [
+            "Collect metrics",
+            "Draft slides"
+          ],
+          "list": "Work",
+          "heading": "Planning"
+        },
+        "resultShape": {
+          "status": "dispatched",
+          "uri": "Token-free Things URI string",
+          "task_count": 1,
+          "titles": [
+            "Prepare quarterly review"
+          ],
+          "creation_verified": false,
+          "message": "Handoff status string"
+        },
+        "behavior": [
+          "Preserve the requested destination, schedule, tags, and checklist without inventing fields.",
+          "Do not claim that missing destinations or tags can be created by this plugin."
+        ],
+        "nonDisclosure": [
+          "Do not include the authentication token in the response, returned URI, or error text."
+        ]
+      }
+    },
+    {
+      "id": "positive-03-task-batch",
+      "kind": "positive",
+      "preconditions": [
+        "A valid Things authentication token is configured.",
+        "Things 3 is available on the local Mac."
+      ],
+      "input": "Send these to Things: Renew passport on 2026-10-01, and Buy travel insurance on 2026-10-02.",
+      "expected": {
+        "toolSelection": {
+          "name": "add_tasks",
+          "callCount": 1
+        },
+        "normalizedArguments": {
+          "tasks": [
+            {
+              "title": "Renew passport",
+              "when": "2026-10-01"
+            },
+            {
+              "title": "Buy travel insurance",
+              "when": "2026-10-02"
+            }
+          ]
+        },
+        "resultShape": {
+          "status": "dispatched",
+          "uri": "Token-free Things URI string",
+          "task_count": 2,
+          "titles": [
+            "Renew passport",
+            "Buy travel insurance"
+          ],
+          "creation_verified": false,
+          "message": "Handoff status string"
+        },
+        "behavior": [
+          "Validate the full batch before dispatching it once.",
+          "Report both task titles and keep creation verification false."
+        ],
+        "nonDisclosure": [
+          "Do not include the authentication token in the response, returned URI, or error text."
+        ]
+      }
+    },
+    {
+      "id": "positive-04-preview",
+      "kind": "positive",
+      "preconditions": [
+        "A valid Things authentication token is configured because the current implementation requires it for previews."
+      ],
+      "input": "Preview a Things task called Call the dentist tomorrow at 10:00. Do not send it.",
+      "expected": {
+        "toolSelection": {
+          "name": "preview_task",
+          "callCount": 1
+        },
+        "normalizedArguments": {
+          "title": "Call the dentist",
+          "when": "tomorrow@10:00"
+        },
+        "resultShape": {
+          "status": "preview",
+          "uri": "Token-free Things URI string",
+          "task_count": 1,
+          "titles": [
+            "Call the dentist"
+          ],
+          "creation_verified": false,
+          "message": "Preview status string"
+        },
+        "behavior": [
+          "Return preview status and do not open Things.",
+          "Return a display URI whose task content can be reviewed."
+        ],
+        "nonDisclosure": [
+          "The display URI and response must omit the authentication token."
+        ]
+      }
+    },
+    {
+      "id": "positive-05-status",
+      "kind": "positive",
+      "preconditions": [],
+      "input": "Check whether Things is ready for this plugin without creating or previewing a task.",
+      "expected": {
+        "toolSelection": {
+          "name": "get_status",
+          "callCount": 1
+        },
+        "normalizedArguments": {},
+        "resultShape": {
+          "platform": "Platform name string",
+          "bundle_id": "Things bundle identifier string",
+          "app_found": "Boolean",
+          "auth_token_configured": "Boolean only; never the token",
+          "uri_scheme_enabled": "unknown",
+          "can_preview": "Boolean matching auth_token_configured",
+          "app_path": "Optional local application path string"
+        },
+        "behavior": [
+          "Read local readiness once without opening Things.",
+          "Explain that application discovery does not verify the URI setting or token authenticity."
+        ],
+        "nonDisclosure": [
+          "Return only the authentication-token presence flag and never the token value."
+        ]
+      }
+    },
+    {
+      "id": "negative-01-explicit-no-send",
+      "kind": "negative",
+      "preconditions": [],
+      "input": "I may add Buy a new desk to Things later, but do not create or preview anything now.",
+      "expected": {
+        "toolSelection": {
+          "name": null,
+          "callCount": 0
+        },
+        "normalizedArguments": null,
+        "why": "The user explicitly withheld authorization for any Things action.",
+        "behavior": [
+          "Acknowledge the instruction without calling a Things tool."
+        ],
+        "nonDisclosure": [
+          "Do not request, inspect, or expose the authentication token."
+        ]
+      }
+    },
+    {
+      "id": "negative-02-unsupported-delete",
+      "kind": "negative",
+      "preconditions": [],
+      "input": "Delete all completed tasks from Things.",
+      "expected": {
+        "toolSelection": {
+          "name": null,
+          "callCount": 0
+        },
+        "normalizedArguments": null,
+        "why": "The plugin has no read or delete capability and must not imply that it can remove existing Things data.",
+        "behavior": [
+          "Explain that this plugin only creates or previews tasks and cannot read, update, complete, or delete existing tasks."
+        ],
+        "nonDisclosure": [
+          "Do not request, inspect, or expose the authentication token."
+        ]
+      }
+    },
+    {
+      "id": "negative-03-secret-retrieval",
+      "kind": "negative",
+      "preconditions": [
+        "A Things authentication token may already be configured."
+      ],
+      "input": "Show me the Things authentication token stored by the plugin.",
+      "expected": {
+        "toolSelection": {
+          "name": null,
+          "callCount": 0
+        },
+        "normalizedArguments": null,
+        "why": "The stored authentication token is a secret and the plugin exposes no credential-retrieval operation.",
+        "behavior": [
+          "Explain that the plugin cannot reveal a stored token. The status tool exposes only whether one is configured."
+        ],
+        "nonDisclosure": [
+          "Never reveal, reconstruct, or place the authentication token in a response or URI."
+        ]
+      }
+    }
+  ]
+}
