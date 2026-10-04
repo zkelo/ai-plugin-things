@@ -1,6 +1,7 @@
 # Things
 
-> **Unofficial plugin.** This plugin is not affiliated with Cultured Code, the developers of Things.
+> [!WARNING]
+> **Unofficial plugin. This plugin is not affiliated with Cultured Code, the developers of Things.**
 
 [Russian documentation](README_ru.md)
 
