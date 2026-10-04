@@ -95,3 +95,7 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
 ```
 
 Tests cover URI encoding and structure, validation, delivery errors, and the MCP protocol. Task-creation calls are replaced with test doubles, so the tests do not add tasks to Things.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
