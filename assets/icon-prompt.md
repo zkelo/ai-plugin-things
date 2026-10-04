@@ -1,0 +1,6 @@
+# Plugin icon generation prompt
+
+Generated with the built-in image_gen tool. Transparent background enabled.
+
+Use case: logo-brand. Asset type: original square productivity plugin icon. Primary request: a beautiful, contemporary, distinctive icon representing different quantities of tasks that can be organized. Design a charcoal graphite rounded-square tile with three clean upright rounded task cards arranged side by side, their heights increasing from left to right. Short mint card contains ONE broad dark horizontal rounded task bar; medium lilac card contains TWO broad dark rounded bars; tall soft peach card contains THREE broad dark rounded bars. The cards are clearly separated, with generous spacing and a balanced compact silhouette, large enough to read at 32px. Premium minimal editorial graphic design, crisp geometry, restrained subtle depth and soft lighting, mostly flat matte surfaces, refined harmonious colors. Center the group with generous margins on the tile. Transparent outside the tile. No text, letters, numerals, checkmarks, checkbox outlines, blue colors, metallic borders, paper curl, photorealism, excessive gloss, tiny details, watermark, or mockup. This must be an independent new visual identity; it must not resemble or use the Things app icon.
+
