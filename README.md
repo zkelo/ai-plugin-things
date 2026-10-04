@@ -1,5 +1,7 @@
 # Things
 
+> **Unofficial plugin.** This plugin is not affiliated with Cultured Code, the developers of Things.
+
 [Russian documentation](README_ru.md)
 
 A local Codex plugin for sending tasks to **Things 3 on macOS** through the [official Things URI scheme](https://culturedcode.com/things/support/articles/2803573/). **A Things authentication token is required to use this plugin.** The code uses Python 3.9+ and the standard library. The plugin has an original icon representing different quantities of tasks. Task titles and notes support Unicode, emoji, and links.
